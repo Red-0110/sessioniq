@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}SessionIQ{% endblock %}</title>
+</head>
+<body>
+  <nav>
+    <a href="{{ url_for('main.dashboard') }}">Dashbaord</a> |
+    <a href="{{ url_for('sessions.index') }}">Sessions</a> |
+    <a href="{{ url_for('activities.index') }}">Activities</a> |
+    <form action="{{ url_for('auth.logout') }}" method="POST" style="display:inline;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit">Logout</button>
+    </form>
+  </nav>
+
+  <hr>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      <p><strong>{{ category }}:</strong> {{ message }}</p>
+    {% endfor %}
+  {% endwith %}
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

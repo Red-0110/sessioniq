@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Activities · SessionIQ{% endblock %}
+
+{% block content %}
+  <h1>Activities</h1>
+
+  <h2>Add activity</h2>
+  <form method="POST">
+    {{ form.hidden_tag() }}
+    <p>{{ form.name.label }}<br>{{ form.name() }}</p>
+    <p>{{ form.category.label }}<br>{{ form.category() }}</p>
+    <p>{{ form.submit() }}</p>
+  </form>
+
+  <h2>Your activities</h2>
+  {% if activities %}
+    <ul>
+      {% for a in activities %}
+        <li><strong>{{ a.name }}</strong>{% if a.category %} — {{ a.category }}{% endif %}</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No activities yet.</p>
+  {% endif %}
+{% endblock %}

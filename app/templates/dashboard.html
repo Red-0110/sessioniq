@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard · SessionIQ{% endblock %}
+
+{% block content %}
+  <h1>Dashboard</h1>
+  <p><strong>{{ selected_activity_name }}</strong> — {{ start }} to {{ end }}</p>
+
+  <form method="GET" action="{{ url_for('main.dashboard') }}">
+    <label for="activity_id"><strong>Filter by activity:</strong></label><br>
+    <select name="activity_id" id="activity_id">
+      <option value="all" {% if activity_id_raw == "all" %}selected{% endif %}>All activities</option>
+      {% for a in activities %}
+        {% set aid = a.id ~ "" %}
+        <option value="{{ a.id }}" {% if activity_id_raw == aid %}selected{% endif %}>{{ a.name }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit">Apply</button>
+  </form>
+
+  <hr>
+
+  <h2>Key metrics (last 90 days)</h2>
+  <ul>
+    <li><strong>Rolling 7-day load:</strong> {{ latest_7 }}</li>
+    <li><strong>Rolling 28-day load:</strong> {{ latest_28 }}</li>
+
+    <li><strong>ACWR (7/28):</strong>
+      {% if ratio is none %}
+        N/A
+      {% else %}
+        {{ "%.2f"|format(ratio) }}
+        {% if ratio < 0.8 %}
+          (low)
+        {% elif ratio <= 1.3 %}
+          (optimal)
+        {% else %}
+          (high)
+        {% endif %}
+      {% endif %}
+    </li>
+
+    <li><strong>Week-over-week load change:</strong>
+      {% if wow is none %}
+        N/A
+      {% else %}
+        {{ "%.0f"|format(wow * 100) }}%
+      {% endif %}
+    </li>
+
+    <li><strong>4-week trend (recent vs earlier):</strong>
+      {% if trend_4w is none %}
+        N/A
+      {% else %}
+        {{ "%.0f"|format(trend_4w * 100) }}%
+      {% endif %}
+    </li>
+  </ul>
+
+  <h2>Daily load</h2>
+  <canvas id="loadChart" width="900" height="300"></canvas>
+
+  <hr>
+
+  <h2>Weekly totals</h2>
+  {% if weekly %}
+    <table border="1" cellpadding="6" cellspacing="0">
+      <thead>
+        <tr>
+          <th>Week start (Mon)</th>
+          <th>Total minutes</th>
+          <th>Total load</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for w in weekly %}
+          <tr>
+            <td>{{ w.week_start }}</td>
+            <td>{{ w.minutes }}</td>
+            <td>{{ w.load }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No data in this date range yet. Log some sessions.</p>
+  {% endif %}
+
+  {# --- Option A: embed JSON safely, then parse it in JS --- #}
+  <script type="application/json" id="chart-data">
+    {{ {
+      "labels": (chart_labels or []),
+      "loads": (chart_loads or []),
+      "r7": (chart_r7 or []),
+      "r28": (chart_r28 or [])
+    } | tojson }}
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    const raw = document.getElementById("chart-data").textContent;
+    const chartData = JSON.parse(raw);
+
+    const ctx = document.getElementById("loadChart");
+
+    new Chart(ctx, {
+      type: "line",
+      data: {
+        labels: chartData.labels,
+        datasets: [
+          { label: "Daily Load", data: chartData.loads },
+          { label: "Rolling 7-day Load", data: chartData.r7 },
+          { label: "Rolling 28-day Load", data: chartData.r28 },
+        ],
+      },
+      options: {
+        responsive: true,
+        interaction: { mode: "index", intersect: false },
+        plugins: { legend: { display: true } },
+        scales: {
+          x: { display: false },
+          y: { beginAtZero: true },
+        },
+      },
+    });
+  </script>
+{% endblock %}
