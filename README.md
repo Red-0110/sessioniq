@@ -8,7 +8,7 @@ The app calculates training loads and provides insights such as:
 - Four (4) week training trends
 
 ## Live Demo
-🔗 https://sessioniq.onrender.com
+https://sessioniq-production.up.railway.app/login
 
 ## Features
 - User authentication (register, login, logout)
