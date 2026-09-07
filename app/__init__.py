@@ -3,9 +3,12 @@ from .config import Config
 from .extensions import db, login_manager, migrate, csrf
 
 
-def create_app():
+def create_app(config=None):
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_object(Config)
+
+    if config:
+        app.config.update(config)
 
     db.init_app(app)
     login_manager.init_app(app)
@@ -26,4 +29,8 @@ def create_app():
     app.register_blueprint(sessions_bp, url_prefix="/sessions")
     app.register_blueprint(activities_bp, url_prefix="/activities")
 
+    from public_demo import init_public_demo
+    init_public_demo(app)
+
     return app
+
