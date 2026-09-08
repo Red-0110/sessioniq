@@ -23,6 +23,8 @@ def login():
 
         login_user(user)
         next_url = request.args.get("next") or url_for("main.home")
+        if not next_url.startswith("/") or next_url.startswith("//") or "\\" in next_url:
+            next_url = url_for("main.home")
         return redirect(next_url)
 
     return render_template("auth/login.html", form=form)
@@ -56,3 +58,4 @@ def register():
 def logout():
     logout_user()
     return redirect(url_for("auth.login"))
+

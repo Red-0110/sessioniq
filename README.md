@@ -1,44 +1,61 @@
-# SessionIQ
+# SessionIQ — local employer demo
 
-SessionIQ is a training performance tracking web application designed for athletes who want to log workouts and analyze training load over time.
+A runnable copy of Red-0110/sessioniq, with fictional data and offline dashboard assets.
 
-The app calculates training loads and provides insights such as:
-- Acute:Chronic Workload Ratio (ACWR)
-- Week over week load change
-- Four (4) week training trends
+## Start
 
-## Live Demo
-https://sessioniq-production.up.railway.app/login
+On this Mac, double-click `Start Demo.command`, or open Terminal in this folder and run:
 
-## Features
-- User authentication (register, login, logout)
-- Activity management (e.g. Tennis, Climbing, Strength Training)
-- Session logging with duration and RPE
-- Automatic training load calculation
-- Interactive dashboard with charts (Chart.js)
-- CSV export of training data
-- Secure per-user data isolation
+```sh
+python3 demo.py setup
+python3 demo.py run --open
+```
 
-## Tech Stack
-- **Backend:** Flask, SQLAlchemy, Flask-Login, Flask-WTF
-- **Frontend:** Jinja2, HTML/CSS, Chart.js
-- **Database:** SQLite (dev) / PostgreSQL (production)
-- **Deployment:** Render
-- **Auth & Security:** Password hashing, CSRF protection
+Setup needs Python 3.11–3.13 and internet access. Tested with Python 3.13 on macOS Apple Silicon. After setup, `run` and the dashboard work offline. Windows launcher: `Start Demo.bat` (not tested on Windows); Windows command equivalent: `py -3 demo.py setup`, then `py -3 demo.py run --open`.
 
-## Why this project?
-This project demonstrates full-stack fundamentals:
-- Relational data modeling
-- Authentication and authorization
-- Server-side rendering
-- Analytics logic (rolling windows, ACWR)
-- Production deployment practices
+Open http://127.0.0.1:5052/login . Keep the terminal running. Stop with Ctrl+C. If the port is occupied, use `python3 demo.py run --port 5062 --open`.
 
-## Setup (Local)
-```bash
-git clone https://github.com/<your-username>/sessioniq.git
-cd sessioniq
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-python run.py
+## Demo accounts
+
+- `alex@example.com`
+- `jordan@example.com`
+- Password for both: `Demo-Explore-2026!`
+
+Seeded data: 2 users, 6 activities, and 80 sessions covering 56 days. Dates are relative to the seed/reset date. Records are synthetic. The accounts have separate records.
+
+## Persistence and reset
+
+Data is stored in `demo-data/demo.sqlite3`. It survives browser refreshes, logout, app restarts, and laptop restarts. Local data does not automatically synchronize to a hosted deployment. The launcher overrides database environment settings so it cannot use your hosted database.
+
+```sh
+python3 demo.py inspect
+```
+
+This prints the database path and table counts. To restore the fictional records, stop the app and run:
+
+```sh
+python3 demo.py reset
+python3 demo.py run --open
+```
+
+Reset backs up the previous demo database inside `demo-data/` before replacing it. To restore a backup, stop the app, preserve the current file, and copy the chosen backup to `demo-data/demo.sqlite3`. `setup` and `seed` preserve existing records.
+
+## Verify
+
+```sh
+.venv/bin/python verify_demo.py
+```
+
+Uses a temporary database to test login, CSRF, creation, persistence across app instances, user isolation, and local chart assets. The verification leaves demo records intact. See `DEMO_GUIDE.md` for the interview walkthrough and hosting plan.
+
+## Packaging
+
+`requirements-demo.txt` installs the app plus Waitress. `requirements-tested.txt` records the complete versions used in verification. The ZIP excludes virtual environments, databases, secrets, backups, and Python caches; setup recreates fictional data on the recipient's machine. Do not copy the `.venv` to another machine; recreate it with setup.
+
+This is a local demo, bound only to `127.0.0.1`. Public hosting needs separate deployment configuration and review. See `ORIGINAL_README.md` for the original project description; old setup/deployment claims there are historical.
+
+## Visitor demo experience (prepared, not deployed)
+
+`public_demo_app.py` is a separate, opt-in entry point. Visitors enter at `/demo` without registering; each browser receives its own fictional account and history. Edits persist across refreshes until the two-hour expiry. Reset replaces only that visitor's data, and End demo deletes it. Account registration, normal login, settings, and account deletion routes are unavailable in this mode.
+
+See [PUBLIC_DEMO.md](PUBLIC_DEMO.md) for configuration, local preview, lifecycle, testing, and remaining hosting work. Hosting, database provider, DNS, and deployment are intentionally undecided.

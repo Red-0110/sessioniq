@@ -25,18 +25,12 @@
     <li><strong>Rolling 7-day load:</strong> {{ latest_7 }}</li>
     <li><strong>Rolling 28-day load:</strong> {{ latest_28 }}</li>
 
-    <li><strong>ACWR (7/28):</strong>
+    <li><strong>7-day share of 28-day load:</strong>
       {% if ratio is none %}
         N/A
       {% else %}
         {{ "%.2f"|format(ratio) }}
-        {% if ratio < 0.8 %}
-          (low)
-        {% elif ratio <= 1.3 %}
-          (optimal)
-        {% else %}
-          (high)
-        {% endif %}
+
       {% endif %}
     </li>
 
@@ -96,7 +90,7 @@
     } | tojson }}
   </script>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="{{ url_for('static', filename='vendor/chart.umd.js') }}"></script>
   <script>
     const raw = document.getElementById("chart-data").textContent;
     const chartData = JSON.parse(raw);
@@ -125,3 +119,4 @@
     });
   </script>
 {% endblock %}
+
